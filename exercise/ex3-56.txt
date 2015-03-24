@@ -1,0 +1,28 @@
+====
+3.56
+====
+
+A. esi: x
+   ebx: n
+   edi: result
+   edx: mask
+
+B. result: 0x55555555
+   mask:   0x80000000
+
+C. mask != 0
+
+D. mask = (unsigned)mask >> (n&0xFF)
+
+E. result ^= x & mask
+
+================================================================================
+int loop(int x, int n)
+{
+    int result = 0x55555555;
+    int mask;
+    for (mask = 0x80000000; mask != 0; mask = (unsigned)mask & (n&0xFF))
+        result ^= x & mask;
+    return result;
+}
+================================================================================

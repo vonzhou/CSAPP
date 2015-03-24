@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+# Convert list of hex numbers into decimal
+
+# 将十六进制数字转化为十进制数字
+# 用法：
+#     $ ./h2d 100 0x500 0x751
+#     0x100=256
+#     0x500=1280
+#     0x751=1873
+
+for ($i = 0; $i < @ARGV; $i++) {
+    $val = hex($ARGV[$i]);
+    printf("0x%x=%d\n", $val, $val);
+}

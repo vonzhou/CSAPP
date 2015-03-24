@@ -1,0 +1,23 @@
+7.14
+
+mofaph@gmail.com
+--------------------------------------------------------------------------------
+
+A. .text:
+        0x25 R_386_32 .text
+        0x11 R_386_32 .text
+        0x28 R_386_32 .text
+        0x28 R_386_32 .text
+        0x28 R_386_32 .text
+
+B. .rodata:
+        0x0 R_386_32 .rodata
+        0x4 R_386_32 .rodata
+        0x8 R_386_32 .rodata
+        0xc R_386_32 .rodata
+        0x10 R_386_32 .rodata
+        0x14 R_386_32 .rodata
+
+也可以使用 objdump 来帮助分析：
+
+$ objdump -rs a.o

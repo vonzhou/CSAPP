@@ -1,0 +1,17 @@
+7.15
+
+mofaph@gmail.com
+--------------------------------------------------------------------------------
+
+A. $ libs=$(find /{,usr/}lib -type f -name "libc.a" -o -name "libm.a")
+   $ for lib in $lib; do printf "$lib: "; ar t $lib | wc -l; done
+
+B. $ gcc -O2 main.c swap.c -o t
+   $ gcc -O2 -g main.c swap.c -o t2
+   $ readelf -a t > t.elf
+   $ readelf -a t2 > t2.elf
+   $ diff -u t.elf t2.elf
+
+C. $ ldd $(which gcc)
+       or
+   $ readelf -a t | grep interp

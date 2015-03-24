@@ -1,0 +1,6 @@
+3.64
+
+A. eax: result, ebx: s1.v, edx: s1.p
+B. ebp-4: s1, ebp-8: s2, ebp-12: y, ebp-16: &x, ebp-20: s2
+C. 将结构的各位成员，按从高到低地址压入栈中
+D. 在栈中的 retaddr+4 位置，分配一个指向结构的指针作为返回地址

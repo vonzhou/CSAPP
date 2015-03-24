@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+# Convert list of decimal numbers into hex
+
+# 将十进制数字转化为十六进制数字
+# 用法：
+#     $ ./d2h 100 500 751
+#     100=0x64
+#     500=0x1f4
+#     751=0x2ef
+
+for ($i = 0; $i < @ARGV; $i++) {
+    printf("%d=0x%x\n", $ARGV[$i], $ARGV[$i]);
+}

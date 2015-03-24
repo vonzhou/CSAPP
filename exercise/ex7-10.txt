@@ -1,0 +1,11 @@
+7.10
+
+mofaph@gmail.com
+--------------------------------------------------------------------------------
+
+A. gcc -static p.o libx.a
+B. gcc -static p.o libx.a liby.a libx.a
+C. x -> y -> z
+        \--> x -> z
+
+   gcc -static p.o libx.a liby.a libx.a libz.a

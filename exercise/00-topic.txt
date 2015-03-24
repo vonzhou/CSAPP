@@ -1,0 +1,1919 @@
+================================================================================
+这个文件收集了《深入理解计算机系统·第二版》的家庭作业的题目。关于这本书的详细信
+息如下：
+
+    深入理解计算机系统·第二版
+    Randal E. Bryant  David R. O'Hallaron 著
+    龚奕利 雷迎春 译
+    机械工业出版社
+    2012 年 7 月第 1 版第 8 次印刷
+================================================================================
+
+2.55 在你能够访问的不同机器上，使用 show_bytes（文件 show-bytes.c）编译并运行示
+     例代码。确定这些机器使用的字节顺序。
+
+2.56 试着用不同的示例值来运行 show_bytes 的代码。
+
+2.57 编写程序 show_short、show_long 和 show_double，它们分别打印类型为 short int、
+     long int 和 double 的 C 语言对象的字节表示。请试着在几种机器上运行。
+
+2.58 编写过程 is_little_endian，当在小端法机器上编译和运行时返回 1，在大端法机器
+     上编译运行时返回 0.这个程序应该可以运行在任何机器上，无论机器的字长是多少。
+
+2.59 编写一个 C 表达式，使它生成一个字，由 x 的最低有效字节和 y 中剩下的字节组成。
+     对于运算数 x=0x89ABCDEF 和 y=0x76543210，就得到 0x765432EF。
+
+2.60 假设我们将一个 w 位的字中的字节从 0（最低位）到 w/8-1（最高位）编号。写出下
+     面的代码，它会返回一个无符号值，其中参数 x 的字节 i 被替换成字节 b：
+
+     unsigned replace_byte(unsigned x, unsigned char b, int i);
+
+     以下的一些示例，说明了这个函数如何工作：
+
+     replace_byte(0x12345678, 0xAB, 2) --> 0x12AB5678
+     replace_byte(0x12345678, 0xAB, 0) --> 0x123456AB
+
+     位级整数编码规则
+
+     在接下来的作业中，我们特意限制了你能使用的编程结构，来帮你更好地理解 C 语言
+     的位级、逻辑和算数运算。在回答这些问题时，你的代码必须遵守下面这些规则：
+
+     o 假设
+       · 整数用补码形式表示。
+       · 有符号数的右移是算数右移。
+       · 数据类型 int 是 w 位长的。对于某些题目，会给定 w 的值，但是在其他情况下，
+         只要 w 是 8 的整数倍，你的代码就应该能工作。你可以用表达式
+         sizeof(int)<<3 来计算 w。
+     o 禁止使用
+       · 条件语句（if 或者 ?:）、循环、分支语句、函数调用和宏调用。
+       · 除法、模运算和乘法。
+       · 相对比较运算符（<、>、<=和>=）。
+     o 允许的运算
+       · 所有的位级和逻辑运算。
+       · 左移和右移，但是位移的数量只能在 0 和 w-1 之间。
+       · 加法和减法。
+       · 相等（==）和不相等（!=）测试。（在有些题目中。也不允许这些运算。）
+       · 整形常数 INT_MIN 和 INT_MAX。
+       · 强制类型转换，无论是显式的还是隐式的。
+
+     即使有这些条件的限制，你仍然可以选择描述性的变量名，并且使用注释来描述你的
+     解决方案的逻辑，尽量提高代码的可读性。例如，下面这段代码从整数参数 x 中抽取
+     出最高有效字节：
+
+     /* Get most significant byte from x */
+     int get_msb(int x) {
+         /* Shift by w-8 */
+         int shift_val = (sizeof(int)-1) << 3;
+         /* Arithmetic shift */
+         int xright = x >> shift_val;
+         /* Zero all but LSB */
+         return xright & 0xFF;
+     }
+
+2.61 写一个 C 表达式，在下列描述的条件下产生 1，而在其他情况下得到 0。假设 x 是
+     int 类型。
+
+     A. x 的任何位都等于 1
+     B. x 的任何位都等于 0
+     C. x 的最高有效字节中的位都等于 1
+     D. x 的最低有效字节中的位都等于 0
+
+     代码应该遵循位级整数编码规则，另外还有一个限制，你不能使用相等（==）和不相
+     等（==）测试。
+
+2.62 编写一个函数 int_shifts_are_logical()，在对 int 类型的数使用算术右移的机器
+     上运行时，这个函数生成 1，而其他情况下生成 0。你的代码应该可以运行在任何字
+     长的机器上。在几种机器上测试你的代码。
+
+2.63 将下面的 C 函数代码补充完整。函数 srl 用算术右移（由值 xsra 给出）来完成逻
+     辑右移，后面的其他操作不包括右移或者除法。函数 sra 用逻辑右移（由值 xsrl 给
+     出）来完成算术右移，后面的其他操作不包括右移或者除法。可以通过计算
+     8*sizeof(int) 来确定数据类型 int 中的位数 w。位移量 k 的取值范围位 0~w-1。
+
+     int sra(int x, int k) {
+         /* Perform shift logically */
+         int xsrl = (unsigned) x >> k;
+         .
+         .
+         .
+     }
+
+     unsigned srl(unsigned x, int k) {
+         /* Perform shift arithmetically */
+         unsigned xsra = (int) x >> k;
+         .
+         .
+         .
+     }
+
+2.64 写出代码实现如下函数：
+
+     /* Return 1 when any even bit of x equals 1; 0 otherwise.
+        Assume w=32 */
+
+        int any_even_one(unsigned x);
+
+     函数应该遵循位级整数编码规则，不过你可以假设数据类型 int 有 w=32 位。
+
+2.65 写出代码实现如下函数：
+
+     /* Return 1 when x contains an even number of 1s; 0 otherwise.
+        Assume w=32 */
+     int even_ones(unsigned x);
+
+     函数应该遵循位级编码规则，不过你可以假设数据类型 int 有 w=32 位。
+     你的代码最多只能包含 12 个算术运算、位运算和逻辑运算。
+
+2.66 写出代码实现如下的函数：
+
+     /*
+      * Generate mask indicating leftmost 1 in x.  Assume w=32.
+      * For example 0xFF00 -> 0x8000, and 0x6600 --> 0x4000.
+      * If x = 0, then return 0.
+      */
+     int leftmost_one(unsigned x);
+
+     函数应该遵循位级整数编码规则，不过你可以假设数据类型 int 有 w=32 位。
+     你的代码最多只能包含 15 个算数运算、位运算和逻辑运算。
+     提示：先将 x 转换成形如 [0...011...1] 的位向量。
+
+2.67 给你一个任务，编写一个过程 int_size_is_32()，当在一个 int 是 32 位的机器上
+     运行时，该程序产生 1，而其他情况则产生 0。不允许使用 sizeof 运算符。下面是
+     开始时的尝试：
+
+     /* The following code does not run properly on some machines */
+     int bad_int_size_is_32() {
+         /* Set most significant bit (msb) of 32-bit machine */
+         int set_msb = 1 << 31;
+         /* Shift past msb of 32-bit word */
+         int beyond_msb = 1 << 32;
+
+         /* set_msb is nonzero when word size >= 32
+            beyond_msb is zero when word size <= 32 */
+         return set_msb && !beyond_msb;
+     }
+
+     当在 SUN SPARC 这样的 32 位机器上编译并运行时，这个过程返回的却是 0。下面的
+     编译器信息给了我们一个问题的指示：
+
+     warning: left shift count >= width of type
+
+     A. 我们的代码在哪个方面没有遵守 C 语言标准？
+     B. 修改代码，使得它在 int 至少为 32 位的任何机器上都能正确运行。
+     C. 修改代码，使得它在 int 至少位 16 位的任何机器上都能正确运行。
+
+2.68 写出具有如下原型的函数的代码：
+
+     /*
+      * Make with least signficant n bits set to 1
+      * Examples: n=6 --> 0x3f, n=17 --> 0x1FFFF
+      * Assume 1 <= n <= w
+      */
+     int lower_bits(int x, int n);
+
+     函数应该遵循位级整数编码规则。要注意 n = w 的情况。
+
+2.69 写出具有如下原型的函数的代码：
+
+     /*
+      * Do rotating right shift.  Assume 0 <= n < w
+      * Examples when x = 0x12345678 and w = 32:
+      *     n=4 -> 0x81234567, n=20 -> 0x45678123
+      */
+     unsigned rotate_right(unsigned x, int n);
+
+     函数应该遵循位级整数编码规则。要注意 n = 0 的情况。
+
+2.70 写出具有如下原型的函数的代码：
+
+     /*
+      * Return 1 when x can be represented as an n-bit, 2's complement
+      * number; 0 otherwise
+      * Assume 1 <= n <= w
+      */
+     int fits_bits(int x, int n);
+
+     函数应该遵循位级整数编码规则。
+
+2.71 你刚刚开始在一家公司工作，他们要实现一组过程来操作一个数据结构，要将 4 个有
+     符号字节封装成一个 32 位 unsigned。一个字中的字节从 0（最低有效字节）编号到
+     3（最高有效字节）。分配给你的任务是：为一个使用补码运算和算数右移的机器编写
+     一个具有如下原型的函数：
+
+     /* Declaration of data type where 4 bytes are packed
+        into an unsigned */
+     typedef unsigned packed_t;
+
+     /* Extract byte from word.  Return as signed integer */
+     int xbyte(packed_t word, int bytenum);
+
+     也就是说，函数会抽取出指定的字节，再把它符号扩展为一个 32 位 int。你的前任
+     （因为水平不够高而被解雇了）编写了下面的代码：
+
+     /* Failed attempt at xbyte */
+     int xbyte(packed_t word, int bytenum)
+     {
+          return (word >> (bytenum << 3)) & 0xFF;
+     }
+
+     A. 这段代码错在哪里？
+     B. 给出函数的正确实现，只能使用左右移位和一个减法。
+
+2.72 给你一个任务，写一个函数，将整数 val 复制到缓冲区 buf 中，但是只有缓冲区
+     buf 中，但是只有当缓冲区中有足够可用的空间时，才执行复制。
+
+     你写的代码如下：
+
+     /* Copy integer into buffer if space is available */
+     /* WARNING: The following code is buggy */
+     void copy_int(int val, void *buf, int maxbytes) {
+         if (maxbytes-sizeof(val) >= 0)
+             memcpy(buf, (void *)&val, sizeof(val));
+     }
+
+     这段代码使用了库函数 memcpy。虽然在这里用这个函数有点刻意，因为我们只是想复
+     制一个 int，但是说明了一种复制较大数据结构的常见方法。
+
+     你仔细地测试了这段代码后发现，哪怕 maxbytes 很小的时候，它也能把值复制到缓
+     冲区中。
+
+     A. 解释为什么代码中的条件测试总是成功。提示：sizeof 运算符返回类型为 size_t 的值。
+     B. 你该如何重写这个条件测试，使之工作正确。
+
+2.73 写出具有如下原型的函数的代码：
+
+     /* Addition that saturates to TMin or TMax */
+     int saturating_add(int x, int y);
+
+     同正常的补码溢出的方式不同，当正溢出时，saturating_add 返回 TMax，负溢出时，
+     返回 TMin。这种运算常常用在执行数字信号处理的程序中。
+
+     你的函数应该遵循位级整数编码规则。
+
+2.74 写出具有如下原型的函数的代码：
+
+     /* Determine whether subtracting arguments will cause overflow */
+     int tsub_ovf(int x, int y);
+
+     如果计算 x-y 导致溢出，这个函数就返回 1。
+
+2.75 假设我们想要计算 x·y 的完整的 2w 位表示，其中，x 和 y 都是无符号数，并且运
+     行在数据类型 unsigned 是 w 位的机器上。乘积的低 w 位能够用表达式 x·y 计算，
+     所以，我们只需要一个具有下列原型的函数：
+
+     unsigned unsigned_high_prod(unsigned x, unsigned y);
+
+     这个函数计算无符号变量 x·y 的高 w 位。
+     我们使用一个具有下面原型的库函数：
+
+     int signed_high_prod(int x, int y);
+
+     它计算在 x 和 y 采用补码形式的情况下，x·y 的高 w 位。编写代码调用这个过程，
+     以实现用无符号数为参数的函数。验证你的解答的正确性。
+
+     提示：看看等式（2-18）的推导中，有符号乘积 x·y 和无符号乘积 x'·y' 之间的关
+     系。
+
+2.76 假设我们有一个任务：生成一段代码，将整数变量 x 乘以不同的常数因子 K。为了提
+     高效率，我们想只使用 +、- 和 << 运算。对于下列的 K 的值，写出执行乘法运算的
+     C 表达式，每个表达式中最多使用 3 个运算。
+
+     A. K=5
+     B. K=9
+     C. K=30
+     D. K=-56
+
+2.77 写出具有如下原型的函数的代码：
+
+     /* Divide by power of two.  Assume 0 <= k < w-1 */
+     int divide_power2(int x, int k);
+
+     该函数要用正确的舍入计算 x/2^k，并且应该遵循位级整数编码规则。
+
+2.78 写出函数 mul5div8 的代码，对于整数参数 x，计算 5*x/8，但是要遵循位级整数编
+     码规则。你的代码计算 5*x 也会产生溢出。
+
+2.79 写出函数 fiveeighths 的代码，对于整数参数 x，计算 5/8x 的值，向零舍入。它不
+     会溢出。函数应该遵循整数位级编码规则。
+
+2.80 编写 C 表达式产生如下位模式，其中 a^n 表示符号 a 重复 n 次。假设一个 w 位的
+     数据类型。你的代码可以包含对参数 m 和 n 的引用，它们分别表示 m 和 n 的值，但
+     是不能使用表示 w 的参数。
+
+     A. 1^(w-n)0^n
+     B. 0^(w-n-m)1^n0^m
+
+2.81 我们在一个 int 类型值为 32 位的机器上运行程序。这些值以补码形式表示，而且它
+     们都是算术右移的。unsigned 类型的值也是 32 位的。
+
+     我们产生随机数 x 和 y，并且把它们转换成无符号数，显示如下：
+
+     /* Create some arbitrary values */
+     int x = random();
+     int y = random();
+     /* Convert to unsigned */
+     unsigned ux = (unsigned) x;
+     unsigned uy = (unsigned) y;
+
+     对于下列每个 C 表达式，你要指出表达式是否总是为 1。如果它总是为 1，那么请描
+     述其中的数学原理。否则，列举一个使它为 0 的参数示例。
+
+     A. (x > y) == (-x < -y)
+     B. ((x + y) << 5) + x - y == 31 * y + 33 * x
+     C. ~x + ~y == ~(x + y)
+     D. (int)(ux - uy) == -(y - x)
+     E. ((x >> 1) << 1) <= x
+
+2.82 一些数字的二进制表示是由形如 0.yyyyyy... 的无穷串组成的，其中 y 是一个 k 位
+     的序列。例如，1/3 的二进制表示是 0.01010101...（y=01），而 1/5 的二进制表示
+     是0.001100110011（y=0011）。
+
+     A. 设 Y=B2Uk(y)，也就是说，这个数具有二进制表示 y。给出一个由 Y 和 k 组成的
+        公式表示这个无穷串的值。提示：请考虑将二进制小数点右移 k 位的结果。
+
+     B. 对于下列 y 的值，串的数值是多少？
+
+        (a) 001
+        (b) 1001
+        (c) 000111
+
+2.83 填写下列程序的返回值，这个程序是测试它的第一个参数是否大于或者等于第二个参
+     数。假定函数 f2u 返回一个无符号 32 位数字，其位表示与它的浮点参数相同。你可
+     以假设两个参数都不是 NaN。两种 0，+0 和 -0 都认为是相等的。
+
+     int float_ge(float x, float y) {
+         unsigned ux = f2u(x);
+         unsigned uy = f2u(y);
+
+         /* Get the sign bits */
+         unsigned sx = ux >> 31;
+         unsigned sy = uy >> 31;
+
+         /* Given an expression using only ux, uy, sx, sy */
+         return ________;
+     }
+
+2.84 给定一个浮点格式，有 k 位指数和 n 位小数，对于小列数，写出阶码 E、尾数 M、
+     小数 f 和值 V 的公式。另外，请描述其位表示。
+
+     A. 数 5.0。
+     B. 能够被准确描述的最大奇整数。
+     C. 最小的规格化数的倒数。
+
+2.85 与 Intel 兼容的处理器也支持“扩展精度”浮点形式，这种格式具有 80 位字长，被
+     分成 1 个符号位、k = 15 个阶码位、1 个单独的整数位和 n = 63 个小数位。整数
+     位是 IEEE 浮点表示中隐含位的显式副本。也就是说，对于规格化的值它等于 1，对
+     于非规格化的值它等于 0。填写小表，给出用这种格式表示的一些“有趣的”数字的
+     近似值。
+
+
+     | 描述               | 扩展精度 |        |
+     |                    | 值       | 十进制 |
+     | 最小的正非规格化数 |          |        |
+     | 最小的正规格化数   |          |        |
+     | 最大的规格化数     |          |        |
+
+2.86 考虑一个基于 IEEE 浮点格式的 16 位浮点表示，它具有 1 个符号位、7 个阶码位
+     （k=7）和 8 个小数位（n=8）。阶码偏置量是 2^(7-1)-1 = 63。
+
+     对于每个给定的数，填写下表，其中每一列具有如下指示说明：
+
+     Hex: 描述编码形式的 4 个十六进制数字。
+
+     M: 尾数的值。这应该是一个形如 x 或 x/y 的数，其中 x 是一个整数，而 y 是 2
+        的整数幂。例如，0、67/64 和 1/25。
+     E: 阶码的整数值。
+     V: 所表示的数字值。使用 x 或者 x * 2^z 表示，其中 x 和 z 都是整数。
+
+     举一个例子，为了表示 7/2，我们有 s=0，M=7/4 和 E=1。因此这个数的阶码字段为
+     0x40（十进制值 63+1=64），尾数字段为 0xC0（二进制 1100 0000_2），得到一个十
+     六进制的表示 40C0。
+
+     标记为“--”的条目不用填写。
+
+     |--------------------------+-----+----+----+----|
+     | 描述                     | Hex | M  | E  | V  |
+     |--------------------------+-----+----+----+----|
+     | -0                       |     |    |    | -- |
+     | 最小的值 >1              |     |    |    |    |
+     | 256                      |     |    |    | -- |
+     | 最大的非规格化数         |     |    |    |    |
+     | -oo                      |     | -- | -- | -- |
+     | 十六进制表示为 3AA0 的数 |     |    |    |    |
+     |--------------------------+-----+----+----+----|
+
+2.87 考虑下面两个基于 IEEE 浮点格式的 9 位浮点表示。
+
+     1. 格式 A
+         o 有一个符号位
+         o 有 k=5 个阶码位。阶码偏置量是 15。
+         o 有 n=3 个小数位。
+
+     2. 格式 B
+         o 有一个符号位
+         o 有 k=4 个阶码位。阶码偏置量是 7。
+         o 有 n=4 个小数位。
+
+     下面给出了一些格式 A 表示的位模式，你的任务是把它们转换成最接近的格式 B 表
+     示的值。如果需要舍入，你要向 +oo 舍入。另外，给出格式 A 和格式 B 表示的位模
+     式对应的值。要么是整数（例如，17），要么是小数（例如，17/64 或 17/2^6）。
+
+     |-------------+-------+-------------+-------|
+     | 格式A       |       | 格式B       |       |
+     |-------------+-------+-------------+-------|
+     | 位          | 值    | 位          | 值    |
+     |-------------+-------+-------------+-------|
+     | 1 01110 001 | -9/16 | 1 0110 0010 | -9/16 |
+     | 0 10110 101 |       |             |       |
+     | 1 00111 110 |       |             |       |
+     | 0 00000 101 |       |             |       |
+     | 1 11011 000 |       |             |       |
+     | 0 11000 100 |       |             |       |
+     |-------------+-------+-------------+-------|
+
+2.88 我们在一个 int 类型为 32 位补码表示的机器上运行程序。float 类型的值使用 32
+     位 IEEE 格式，而 double 类型的值使用 64 位 IEEE 格式。
+
+     我们产生随机数 x、y 和 z，并且把它们转换成 double 类型的值：
+
+     /* Create some arbitrary values */
+     int x = random();
+     int y = random();
+     int z = random();
+
+     /* Convert to double */
+     double dx = (double)x;
+     double dy = (double)y;
+     double dz = (double)z;
+
+     对于下列的每个 C 表达式，你要指出表达式是否总是为 1。如果它总是为 1，描述其
+     中的数学原理。否则，列举出使它为 0 的参数的例子。请注意，不能使用 IA32 机器
+     运行 GCC 来测试你的答案，因为对于 float 和 double，它使用的都是 80 位的扩展
+     精度表示。
+
+     A. (double)(float)x == dx
+     B. dx + dy == (double)(x+y)
+     C. dx + dy + dz == dz + dy + dx
+     D. dx * dy * dz == dz * dy * dx
+     E. dx / dx == dy / dy
+
+2.89 分配给你一个任务，编写一个 C 函数来计算 2^x 的浮点表示。你意识到完成这个任
+     务的最好方法是直接创建结果的 IEEE 单精度表示。当 x 太小时，你的程序将返回
+     0.0。当 x 太大时，它会返回 +oo。填写下列代码的空白部分，以计算出正确的结果。
+     假设函数 u2f 返回的浮点值与它的无符号参数有相同的位表示。
+
+2.90 大约在公元前 250 年，希腊数学家阿基米德证明了 223/71 < PI < 22/7。如果当时
+     有一台计算机和标准库 <math.h>，他就能够确定 n 的单精度浮点近似值的十六进制
+     表示为 0x40490FDB。当然，所有的这些都只是近似值，因为 PI 不是有理数。
+
+     A. 这个浮点值表示的二进制小数是多少？
+     B. 22/7 的二进制小数表示是什么？提示：参见家庭作业 2.82。
+     C. 这两个 22/7 的近似值从哪一位（相对于二进制小数点）开始不同的？
+
+     位级浮点编码规则
+
+     在接下来的题目中，你要写的代码要实现浮点函数在浮点数的位级表示上直接运算。
+     你的代码应该完全遵循 IEEE 浮点运算的规则，包括当需要舍入时，要使用向偶数舍
+     入的方式。为此，我们定义数据类型 float_bits 等价于 unsigned：
+
+     /* Access bit-level representation floating-point number */
+     typedef unsigned float_bits;
+
+     你的代码中不使用数据类型 float，而要使用 float_bits。你可以使用数据类型 int
+     和 unsigned，包括无符号和整数常数和运算。你不可以使用任何联合、结构和数组。
+     更重要的是，你不能使用任何浮点数据类型、运算或者常数。取而代之的是，你的代
+     码应该执行实现这些指定的浮点运算的位操作。
+
+     下面的函数说明了对这些规则的使用。对于参数 f，如果 f 是非规格化的，该函数返
+     回 ±0（保持 f 的符号），否则，返回 f。
+
+     /* If f is denorm, return 0. Otherwise, return f */
+     float_bits float_denorm_zero(float_bits f) {
+         /* Decompose bit representation into parts */
+         unsigned sign = f>>31;
+         unsigned exp = f>>23 & 0xFF;
+         unsigned frac = f    & 0x7FFFFF;
+         if (exp == 0) {
+             /* Denormalized.  Set fraction to 0 */
+             frac = 0;
+         }
+         /* Reassemble bits */
+         return (sign << 31) | (exp << 23) | frac;
+     }
+
+2.91 遵循位级浮点编码规则，实现具有如下原型的函数：
+
+     /* Compute |f|.  If f is NaN, then return f. */
+     float_bits float_absval(float_bits f);
+
+     对于浮点数 f，这个函数计算 |f|。如果 f 是 NaN，你的函数应该简单地返回 f。测
+     试你的函数，对参数 f 可以取的所有 2^32 个值求值，将结果与你实用机器的浮点运
+     算得到的结果相比较。
+
+2.92 遵循位级浮点编码规则，实现具有如下原型的函数：
+
+     /* Compute -f.  If f is Nan, then return f. */
+     float_bits float_negate(float_bits f);
+
+     对于浮点数 f，这个函数计算 -f。如果 f 是 NaN，你的函数应该简单地返回 f。测试
+     你的函数，对参数 f 可以取的所有 2^32 个值求值，将结果与你使用机器的浮点运算
+     得到的结果相比较。
+
+2.93 遵循位级浮点编码规则，实现具有如下原型的函数：
+
+     /* Compute 0.5*f.  If f is NaN, then return f. */
+     float_bits float_half(float_bits f);
+
+     对于浮点数 f，这个函数计算 0.5*f。如果 f 是 NaN，你的函数应该简单返回 f。测
+     试你的函数，对参数 f 可以取的所有 2^32 个值求值，将结果与你使用机器的浮点运
+     算得到的结果相比较。
+
+2.94 遵循位级浮点编码规则，实现具有如下原型的函数：
+
+     /* Compute 2*f.  If f is NaN, then return f. */
+     float_bits float_twice(float_bits f);
+
+     对于浮点数 f，这个函数计算 2.0*f。如果 f 是 NaN，你的函数应该简单地返回 f。
+     测试你的函数，对参数 f 可以取的所有 2^32 个值求值，将结果与你使用机器的浮点
+     运算得到的结果相比较。
+
+2.95 遵循位级浮点编码规则，实现具有如下原型的函数：
+
+     /* Compute (float) i */
+     float_bits float_i2f(int i);
+
+     对于参数 i，这个函数计算 (float)i 的位级表示。
+     测试你的函数，对参数 f 可以取的所有 2^32 个值求值，将结果与你使用机器的浮点
+     运算得到的结果相比较。
+
+2.96 遵循位级浮点编码规则，实现具有如下原型的函数：
+
+     /*
+      * Compute (int) f.
+      * If conversion causes overflow or f is NaN, return 0x80000000
+      */
+    int float_f2i(float_bits f);
+
+    对于浮点数 f，这个函数计算 (int)f。你的函数应该向零舍入。如果f 不能用整数表示
+    （例如，超出表示范围，或者它是一个 NaN），那么函数应该返回0x80000000。测试你
+    的函数，对参数 f 可以取的所有 2^32 个值求值，将结果与你使用机器的浮点运算得到
+    的结果相比较。
+
+3.54 一个函数的原型为
+
+     int decode2(int x, int y, int z);
+
+     将这个函数编译成 IA32 汇编代码。代码体如下：
+
+     # x at %ebp+8, y at %ebp+12, z at %ebp+16
+     1  movl    16(%ebp), %edx
+     2  subl    12(%ebp), %edx
+     3  movl    %edx, %eax
+     4  sall    $15, %eax
+     5  sarl    $15, %eax
+     6  xorl    8(%ebp), %edx
+     7  imull   %edx, %eax
+
+     参数 x、y 和 z 存放在存储器中相对于寄存器 %ebp 中地址偏移量为 8、12 和 16
+     的地方。代码将返回值存放在寄存器 %eax 中。
+
+     写出等价于我们汇编代码的 decode2 的 C 代码。
+
+3.55 下面的代码计算 x 和 y 的乘积，并将结果存放在存储器中。数据类型 ll_t 被定义
+     为等价于 long long。
+
+     typedef long long ll_t;
+
+     void store_prod(ll_t *dest, ll_t x, int y)
+     {
+         *dest = x * y;
+     }
+
+     GCC 生成下面的汇编代码实现计算：
+
+     # dest at %ebp+8, x at %ebp+12, y at %ebp+20
+     1  movl    12(%ebp), %esi
+     2  movl    20(%ebp), %eax
+     3  movl    %eax, %edx
+     4  sarl    $31, %edx
+     5  movl    %edx, %ecx
+     6  imull   %esi, %ecx
+     7  movl    16(%ebp), %ebx
+     8  imull   %eax, %ebx
+     9  addl    %ebx, %ecx
+     10 mull    %esi
+     11 leal    (%ecx, %edx), %edx
+     12 movl    8(%ebp), %ecx
+     13 movl    %eax, (%ecx)
+     14 movl    %edx, 4(%ecx)
+
+     这段代码用了三个乘法来实现多精度运算，这个多精度运算是在 32 位机器上实现 64
+     位运算所需要的。描述用来计算这个乘积的算法，并对汇编代码添加注释，说明它是
+     如何实现你的算法的。
+
+     提示：参考练习题 3.12 及其答案。
+
+3.56 考虑下面的汇编代码：
+
+     # x at %ebp+8, n at %ebp+12
+     1  movl    8(%ebp), %esi
+     2  movl    12(%ebp), %ebx
+     3  movl    $1431655765, %edi
+     4  movl    $-2147483648, %edx
+     5 .L2:
+     6  movl    %edx, %eax
+     7  andl    %esi, %eax
+     8  xorl    %eax, %edi
+     9  movl    %ebx, %ecx
+     10 shrl    %cl, %edx
+     11 testl   %edx, %edx
+     12 jne     .L2
+     13 movl    %edi, %eax
+
+     以上代码是以下整体形式的 C 代码编译产生的：
+
+     1  int loop(int x, int n)
+     2  {
+     3      int result = ____;
+     4      int mask;
+     5      for (mask = ____; mask ____; mask = ____) {
+     6          result ^= ____;
+     7      }
+     8      return result;
+     9  }
+
+     你的任务是填写这个 C 代码中缺失的部分，得到一个程序等价于产生的汇编代码。回
+     想一下，这个函数的结果是在寄存器 %eax 中返回的。你会发现以下工作很有帮助：
+     检查循环之前、之中和之后的汇编代码，形成一个寄存器和程序变量之间一致的映射。
+
+     A. 哪个寄存器保存着程序值 x、n、result 和 mask？
+     B. result 和 mask 的初始值是什么？
+     C. mask 的测试条件是什么？
+     D. mask 是如何被修改的？
+     E. result 是如何被修改的？
+     F. 填写这段 C 代码中所有缺失的部分。
+
+3.57 在 3.6.6 节，我们查看了下面的代码，作为使用条件数据传输的一种选择：
+
+     int cread(int *xp) {
+         return (xp ? *xp : 0);
+     }
+
+     我们给出了使用条件传送指令的一个尝试实现，但是认为它是不合法的，因为它试图
+     从一个空地址读数据。
+
+     写一个 C 函数 cread_alt，它与 cread 有一样的行为，除了它可以被编译成使用条
+     件数据传送。当用命令行选项 '-march=i686' 来编译时，产生的代码应该使用条件传
+     送指令而不是某种跳转指令。
+
+3.58 下面的代码是在一个开关语句中根据枚举类型值进行分支选择的例子。回忆一下，C
+     语言中枚举类型只是一种引入一组与整数值相对应的名字的方法。默认情况下，值是
+     从 0 向上依次赋给名字的。在我们的代码中，省略了与各种情况标号相对应的动作。
+
+     /* Enumerated type creates set of constants numbered 0 and upward */
+     typedef enum { MODE_A, MODE_B, MODE_C, MODE_D, MODE_E } mode_t;
+
+     int switch3(int *p1, int *p2, mode_t action)
+     {
+         int result = 0;
+         switch (action) {
+         case MODE_A:
+         case MODE_B:
+         case MODE_C:
+         case MODE_D:
+         case MODE_E:
+         default:
+         }
+         return result;
+     }
+
+     产生的实现各个动作的汇编代码部分如下所示。注释指明了参数位置，寄存器值，以
+     及各个跳转目的的情况标号。寄存器 %edx 对应于程序变量 result，并被初始化为
+     -1。填写 C 代码中缺失的部分。注意那些会落入其他情况中的情况。
+
+     # Arguments: p1 at %ebp+8, p2 at %ebp+12, action at %ebp+16
+     # Registers: result in %edx (initialized to -1)
+     # The jump targets:
+     1  .L17:                   # MODE_E
+     2    movl  $17, %edx
+     3    jmp   .L19
+     4  .L13:                   # MODE_A
+     5    movl  8(%ebp), %eax
+     6    movl  (%eax), %edx
+     7    movl  12(%ebp), %ecx
+     8    movl  (%ecx), %eax
+     9    movl  8(%ebp), %ecx
+     10   movl  %eax, (%ecx)
+     11   jmp   .L19
+     12 .L14:                   # MODE_B
+     13   movl  12(%ebp), %edx
+     14   movl  (%edx), %eax
+     15   movl  %eax, %edx
+     16   movl  8(%ebp), %ecx
+     17   addl  (%ecx), %edx
+     18   movl  12(%ebp), %eax
+     19   movl  %edx, (%eax)
+     20   jmp   .L19
+     21 .L15:                   # MODE_C
+     22   movl  12(%ebp), %edx
+     23   movl  $15, (%edx)
+     24   movl  8(%ebp), %ecx
+     25   movl  (%ecx), %edx
+     26   jmp   .L19
+     27 .L16:                   # MODE_D
+     28   movl  8(%ebp), %edx
+     29   movl  (%edx), %eax
+     30   movl  12(%ebp), %ecx
+     31   movl  %eax, (%ecx)
+     32   movl  $17, %edx
+     33 .L19:                   # default
+     34   movl  %edx, %eax      # Set return value
+
+     上面的代码实现了 switch 语句的各个分支
+
+3.59 这个程序给你一个机会，逆向工程一个 switch 语句。在下面这个过程中，去掉了
+     switch 语句的主体：
+
+     int switch_prob(int x, int n)
+     {
+         int result = x;
+
+         switch (n) {
+             /* Fill in code here */
+         }
+         return result;
+     }
+
+     下面给出了这个过程的反汇编机器代码。我们可以看到，在第 4 行，参数 n 被加载
+     到寄存器 %eax 中。
+
+     1 08048420 <switch_prob>:
+     2  8048420: 55                     push %ebp
+     3  8048421: 89 e5                  mov %esp, %ebp
+     4  8048423: 8b 45 0c               mov 0xc(%ebp), %eax
+     5  8048426: 83 e8 28               sub $0x28, %eax
+     6  8048429: 83 f8 05               cmp $0x5, %eax
+     7  804842c: 77 07                  ja 8048435 <switch_prob+0x15>
+     8  804842e: ff 24 85 f0 85 04 08   jmp *0x80485f0(,%eax,4)
+     9  8048435: 8b 45 08               mov 0x8(%ebp), %eax
+     10 8048438: eb 24                  jmp 804845e <switch_prob+0x3e>
+     11 804843a: 8b 45 08               mov 0x8(%ebp), %eax
+     12 804843d: 8d 76 00               lea 0x0(%esi), %esi
+     13 8048440: eb 19                  jmp 804845b <switch_prob+0x3b>
+     14 8048442: 8b 45 08               mov 0x8(%ebp), %eax
+     15 8048445: c1 e0 03               shl $0x3, %eax
+     16 8048448: eb 17                  jmp 8048461 <switch_prob+0x41>
+     17 804844a: 8b 45 08               mov 0x8(%ebp), %eax
+     18 804844d: c1 f8 03               sar $0x3, %eax
+     19 8048450: eb 0f                  jmp 8048461 <switch_prob+0x41>
+     20 8048452: 8b 45 08               mov 0x8(%ebp), %eax
+     21 8048455: c1 e0 03               shl $0x3, %eax
+     22 8048458: 2b 45 08               sub 0x8(%ebp), %eax
+     23 804845b: 0f af c0               imul %eax, %eax
+     24 804845e: 83 c0 11               add $0x11, %eax
+     25 8048461: 5d                     pop %ebp
+     26 8048462: c3                     ret
+
+     跳转表驻留在另一个存储器区域中。可以从第 8 行的间接跳转看出，跳转表的起始地
+     址为 0x80485f0。用调试器 GDB，我们可以用命令 x/6w 0x80485f0 来检查存储器中
+     的 6 个 4 字节的字。GDB 打印下面的内容：
+
+     (gdb) x/6w 0x80485f0
+     0x80485f0: 0x08048442 0x08048435 0x08048442 0x0804844a
+     0x8048600: 0x08048452 0x0804843a
+
+     用 C 代码填写开关语句的主体，使它的行为与机器代码一致。
+
+3.60 考虑下面的源代码，这里 R、S 和 T 都是用 #define 声明的常数：
+
+     int A[R][S][T];
+
+     int store_ele(int i, int j, int k, int *dest)
+     {
+         *dest = A[i][j][k];
+         return sizeof(A);
+     }
+
+     编译这个程序，GCC 产生下面的汇编代码：
+
+     ; i at %ebp+8, j at %ebp+12, k at %ebp+16, dest at %ebp+20
+     1  movl 8(%ebp), %ecx
+     2  movl 12(%ebp), %eax
+     3  leal (%eax,%eax,8), %eax
+     4  movl %ecx, %edx
+     5  sall $6, %edx
+     6  subl %ecx, %edx
+     7  addl %edx, %eax
+     8  addl 16(%ebp), %eax
+     9  movl A(,%eax,4), %edx
+     10 movl 20(%ebp), %eax
+     11 movl %edx, (%eax)
+     12 movl $2772, %eax
+
+     A. 将等式（3-1）从二维扩展到三维，提供数组元素 A[i][j][k] 的位置的公式。
+     B. 运用你的逆向工程技术，根据汇编代码，确定 R、S 和 T 的值。
+
+3.61 C 编译器为 var_prod_ele 产生的代码不能将它在循环中使用的所有值都放进寄存器中，
+     因此它必须在每次循环时都从存储器中读出 n 的值。写出这个函数的 C 代码，使用类
+     似于 GCC 执行的那些优化，但是它的编译代码不会让循环值溢出到存储器中。
+
+     /* Compute i,k of variable matrix product */
+     int var_prod_ele(int n, int A[n][n], int B[n][n], int i, int k)
+     {
+         int j;
+         int result = 0;
+
+         for (j = 0; j < n; j++)
+             result += A[i][j] * B[j][k];
+
+         return result;
+     }
+
+     回忆一下，处理器只有 6 个寄存器可用来保存临时数据，因为寄存器 %ebp 和 %esp
+     不能用于此目的。其中一个寄存器还必须用来保存乘法指令的结果。因此，你必须把
+     循环中的值的数量从 6 个（result、Arow、Bcol、j、n 和 4*n）减少到 5 个。
+
+     需要找到一个对你那种编译器行之有效的策略。不断尝试各种不同的策略，直到有一
+     种能工作。
+
+3.62 下面的代码转置一个 MxM 矩阵的元素，这里 M 是一个用 #define 定义的常数：
+
+     void transpose(int A[M][M])
+     {
+         int i,j;
+         for (i = 0; i < M; i++)
+             for (j = 0; j < i; j++) {
+                 int t = A[i][j];
+                 A[i][j] = A[j][i];
+                 A[j][i] = t;
+             }
+     }
+
+     当用优化等级 -O2 编译时，GCC 为这个函数的内部循环产生下面的代码：
+
+     1 .L3:
+     2   movl (%ebx), %eax
+     3   movl (%esi,%ecx,4), %edx
+     4   movl %eax, (%esi,%ecx,4)
+     5   addl $1, %ecx
+     6   movl %edx, (%ebx)
+     7   addl $76, %ebx
+     8   cmpl %edi, %ecx
+     9   jl   .L3
+
+     A. M 的值是多少？
+     B. 哪个寄存器保持着程序值 i 和 j？
+     C. 写 transpose 的一个 C 代码版本，使用在这个循环中出现的优化。在你的代码中，
+        使用参数 M，而不要使用常数值。
+
+3.63 考虑下面的源代码，这里 E1 和 E2 是用 #define 声明的宏表达式，计算用参数 n
+     表示的矩阵 A 的维度。这段代码计算矩阵的第 j 列的元素之和。
+
+     int sum_col(int n, int A[E1(n)][E2(n)], int j)
+     {
+         int i;
+         int result = 0;
+         for (i = 0; i < E1(n); i++)
+             result += A[i][j];
+         return result;
+     }
+
+     编译这个程序，GCC 产生下面的汇编代码：
+
+     ; n at %ebp+8, A at %ebp+12, j at %ebp+16
+     1    movl     8(%ebp), %edx
+     2    leal     (%edx,%edx), %eax
+     3    leal     -1(%eax), %ecx
+     4    leal     (%eax,%edx), %esi
+     5    movl     $0, %eax
+     6    testl    %esi, %esi
+     7    jle      .L3
+     8    leal     0(,%ecx,4), %ebx
+     9    movl     16(%ebp), %eax
+     10   movl     12(%ebp), %edx
+     11   leal     (%edx,%eax,4), %ecx
+     12   movl     $0, %edx
+     13   movl     $0, %eax
+     14 .L4:
+     15   addl     (%ecx), %eax
+     16   addl     $1, %edx
+     17   addl     %ebx, %ecx
+     18   cmpl     %esi, %edx
+     19   jl       .L4
+     20 .L3:
+
+     运用你的逆向工程技术，确定 E1 和 E2 的定义。
+
+3.64 这个作业要查看 GCC 为参数和返回值中有结构的函数产生的代码，由此可以看到通常
+     这些语句特性是如何实现的。
+
+     下面的 C 代码是函数 word_sum，它用结构作为参数和返回值，还有一个函数 diff
+     调用 word_sum。
+
+     typedef struct {
+         int *p;
+         int v;
+     } str1;
+
+     typedef struct {
+         int prod;
+         int sum;
+     } str2;
+
+     str2 word_sum(str1 s1)
+     {
+         str2 result;
+
+         result.prod = *s1.p * s1.v;
+         result.sum  = *s1.p + s1.v;
+
+         return result;
+     }
+
+     int diff(int x, int y)
+     {
+         str1 s1;
+         str2 s2;
+
+         s1.p = &x;
+         s1.v = y;
+         s2 = word_sum(s1);
+
+         return s2.prod - s2.sum;
+     }
+
+     GCC 为这两个函数产生下面的代码：
+
+     1  word_sum:                 1    diff:
+     2    pushl %ebp              2      pushl %ebp
+     3    movl %esp, %ebp         3      movl %esp, %bp
+     4    pushl %ebx              4      subl $20, %esp
+     5    movl 8(%ebp), %eax      5      leal -8(%ebp), %edx
+     6    movl 16(%ebp), %ebx     6      leal 8(%ebp), %eax
+     7    movl 12(%ebp), %edx     7      movl %eax, 4(%esp)
+     8    movl (%edx), %edx       8      movl 12(%ebp), %eax
+     9    leal (%edx,%ebx), %ecx  9      movl %eax, 8(%esp)
+     10   movl %ecx, 4(%eax)      10     movl %edx, (%esp)
+     11   imull %ebx, %edx        11     call word_sum
+     12   movl %edx, (%eax)       12     subl $4, %esp
+     13   popl %ebx               13     movl -8(%ebp), %eax
+     14   popl %ebp               14     subl -4(%ebp), %eax
+     15   ret $4                  15     leave
+     16                           16     ret
+
+     指令 ret $4 很像普通的返回指令，但是它将栈指针增加了 8（4 个是为了返回地址，
+     加上 4 的加法），而不是 4。
+
+     A. 从 word_sum 代码的第 5~7 行我们可以看到，虽然函数只有一个参数，但是看上
+        去好像从栈中取出了 3 个值。描述这三个值分别是什么。
+     B. 从 diff 代码的第 4 行我们可以看到，栈桢中分配了 20 个字节。把他们当作 5
+        个字段来使用，每个字段 4 个字节。描述每个字段都是怎么用的。
+     C. 你要如何描述向函数传递结构参数的通用策略？
+     D. 你要如何描述处理从函数返回结构值的通用策略？
+
+3.65 在下面的代码中，A 和 B 是用 #define 定义的常数：
+
+     typedef struct {
+         short x[A][B]; /* Unknown constants A and B */
+         int y;
+     } str1;
+
+     typedef struct {
+         char array[B];
+         int t;
+         short s[B];
+         int u;
+     } str2;
+
+     void setVal(str1 *p, str2 *q)
+     {
+         int v1 = q->t;
+         int v2 = q->u;
+         p->y = v1 + v2;
+     }
+
+     GCC 为 setVal 的主体产生下面的代码：
+
+     movl 12(%ebp), %eax
+     movl 28(%eax), %edx
+     addl 8(%eax), %edx
+     movl 8(%ebp), %eax
+     movl %edx, 44(%eax)
+
+     A 和 B 的值是多少？（答案是唯一的。）
+
+3.66 你负责维护一个大型的 C 程序时，遇到下面这样的代码：
+
+     1  typedef struct {
+     2      int left;
+     3      a_struct a[CNT];
+     4      int right;
+     5  } b_struct;
+     6
+     7  void test(int i, b_struct *bp)
+     8  {
+     9      int n = bp->left + bp->right;
+     10     a_struct *ap = &bp->a[i];
+     11     ap->x[ap->idx] = n;
+     12 }
+
+     编译时常数 CNT 和结构 a_struct 的声明在一个你没有访问权限的文件中。幸好，你有代
+     码的'.o'版本，可以用 objdump 程序来反汇编这些文件，得到下面的反汇编代码：
+
+     1     00000000 <test>:
+     2      0:  55                   push %ebp
+     3      1:  89 e5                mov %esp, %ebp
+     4      3:  53                   push %ebx
+     5      4:  8b 45 08             mov 0x8(%ebp), %eax
+     6      7:  8b 4d 0c             mov 0xc(%ebp), %ecx
+     7      a:  6b d8 1c             imul $0x1c, %eax, %ebx
+     8      d:  8d 14 c5 00 00 00 00 lea 0x0(,%eax,8), %edx
+     9      14: 29 c2                sub %eax, %edx
+     10     16: 03 54 19 04          add 0x4(%ecx,%ebx,1), %edx
+     11     1a: 8b 81 c3 00 00 00    mov 0xc8(%ecx), %eax
+     12     20: 03 01                add (%ecx), %eax
+     13     22: 89 44 91 08          mov %eax, 0x8(%ecx,%edx,4)
+     14     25: 5b                   pop %ebx
+     15     27: 5d                   pop %ebp
+     16     28: c3                   ret
+
+     运用你的逆向工程技术，推断下列的内容：
+
+     A. CNT 的值
+     B. 结构 a_struct 的完成声明。假设这个结构只有字段 idx 和 x。
+
+3.67 考虑下面的联合声明：
+
+     union ele {
+         struct {
+             int *p;
+             int x;
+         } e1;
+
+         struct {
+             int y;
+             union ele *next;
+         } e2;
+     };
+
+     这个声明说明联合中可以嵌套结构。
+
+     下面的过程（省略了一些表达式）对一个链表进行操作，链表是以上述联合作为元素的：
+
+     void proc(union ele *up)
+     {
+         up->____ = *(up->____) - up->____;
+     }
+
+     A. 小列字段的偏移量是多少（以字节为单位）：
+
+     e1.p: ____
+     e2.x: ____
+     e2.y: ____
+     e2.next: ____
+
+     B. 这个结构总共需要多少个字节？
+     C. 编译器为 proc 的主体产生下面的汇编代码：
+
+     ; up at %ebp+8
+     1 movl 8(%ebp), %edx
+     2 movl 4(%edx), %ecx
+     3 movl (%ecx), %eax
+     4 movl (%eax), %eax
+     5 subl (%edx), %eax
+     6 movl %eax, 4(%ecx)
+
+     在这些信息的基础上，填写 proc 代码中缺失的表达式。提示：有些联合引用的解释可以有
+     歧义。当你清楚引用指引到哪里的时候，就能够澄清这些歧义。只有一个答案，不需要进行
+     强制类型转换，且不违反任何类型限制。
+
+3.68 写一个函数 good_echo，它从标准输入读取一行，再把它写到标准输出。你的实现应
+     该对任意长度的输入行都能工作。可以使用库函数 fgets，但是你必须确保即使当输
+     入行要求比你应该为缓冲区分配的更多的空间时，你的函数也能正确地工作。你的代
+     码还应该检查错误条件，要在遇到 1 时返回。参考标准 I/O 函数的定义文档[48, 58]。
+
+3.69 下面的声明定义了一类结构，用来构建二叉树：
+
+     1 typedef struct ELE *tree_ptr;
+     2
+     3 struct ELE {
+     4     tree_ptr left;
+     5     tree_ptr right;
+     6     long val;
+     7 };
+
+     对于具有如下原型的函数：
+
+     long trace(tree_ptr tp);
+
+     GCC 产生下面的 x86-64 代码：
+
+       1  trace:
+           ; tp in %rdi
+       2    movl $0, %eax
+       3    testq %rdi, %rdi
+       4    je .L3
+       5  .L5:
+       6    movq 16(%rdi), %rax
+       7    movq (%rdi), %rdi
+       8    testq %rdi, %rdi
+       9    jne .L5
+       10 .L3:
+       11   rep
+       12   ret
+
+     A. 给出一个该函数的 C 版本，使用 while 循环。
+     B. 用自然语言解释这个函数计算的是什么。
+
+3.70 用家庭作业 3.69 中的树结构，以及一个具有以下原型的函数
+
+     long traverse(tree_ptr tp)
+
+     GCC 产生下面的 x86-64 代码：
+
+     1  traverse:
+         ; tp in %rdi
+     2      movq %rbx, -24(%rsp)
+     3      movq %rbp, -16(%rsp)
+     4      movq %r12, -8(%rsp)
+     5      subq $24, %rsp
+
+     6      movq %rdi, %rbp
+     7      movabsq $9223372036854775807, %rax
+     8      test %rdi, %rdi
+     9      je .L9
+
+     10     movq 16(%rdi), %rbx
+     11     movq (%rdi), %rdi
+     12     call traverse
+
+     13     movq %rax, %r12
+     14     movq 8(%rbp), %rdi
+     15     call traverse
+
+     16     cmpq %rax, %r12
+     17     cmovle %r12, %rax
+     18     cmpq %rbx, %rax
+     19     cmovg %rbx, %rax
+
+     20 .L9:
+     21     movq (%rsp), %rbx
+     22     movq 8(%rsp), %rbp
+     23     movq 16(%rsp), %r12
+     24     addq $24, %rsp
+     25     ret
+
+     A. 生成这个函数的 C 版本。
+     B. 用自然语言解释这个函数计算的是什么。
+
+7.6 考虑下面的 swap.c 函数版本，它计算自己被调用的次数：
+
+    1  extern int buf[];
+    2
+    3  int *bufp0 = &buf[0];
+    4  static int *bufp1;
+    5
+    6  static void incr()
+    7  {
+    8      static int count = 0;
+    9
+    10      count++;
+    11  }
+    12
+    13  void swap()
+    14  {
+    15      int temp;
+    16
+    17      incr();
+    18      bufp1 = &buf[1];
+    19      temp = *bufp0;
+    20      *bufp0 = *bufp1;
+    21      *bufp1 = temp;
+    22  }
+
+    对于每个 swap.o 中定义和引用的符号，请指出它是否在模块 swap.o 的 .symtab 节中有
+    符号表条目。如果是这样，请指出定义该符号的模块（swap.o 或 main.o）、符号类型（本
+    地、全局或外部）以及它在模块中所处的节（.text、.data 或 .bss）。
+
+    |-------+----------------------+----------+----------------+----|
+    | 符号  | .swap.o.symtab条目？ | 符号类型 | 定义符号的模块 | 节 |
+    |-------+----------------------+----------+----------------+----|
+    | buf   |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+    | bufp0 |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+    | bufp1 |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+    | swap  |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+    | temp  |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+    | incr  |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+    | count |                      |          |                |    |
+    |-------+----------------------+----------+----------------+----|
+
+7.7 不改变任何变量名字，修改 7.6.1 节中的 bar5.c，使得 foo5.c 输出 x 和 y 的正确
+    值（也就是整数 15213 和 15212 的十六进制表示）。
+
+7.8 在此题中，REF(x,i) --> DEF(x,k) 表示链接器将任意对模块 i 中符号 x 的引用与模
+    块 k 中符号 x 的定义相关联。在下面每个例子中，用这种符号来说明链接器是如何解
+    析在每个模块中有多重定义的引用的。如果出现链接时错误（规则 1），写“ERROR”。
+    如果链接器从定义中任意选择一个（规则 3），那么写“UNKNOWN”。
+
+    A. /* Module 1*/                /* Module 2 */
+       int main()                   static int main = 1;
+       {                            int p2()
+       }                            {
+                                    }
+
+    a) REF(main.1) --> DEF(____.____)
+    b) REF(main.2) --> DEF(____.____)
+
+    B. /* Module 1 */               /* Module 2 */
+       int x;                       double x;
+       void main()                  int p2()
+       {                            {
+       }                            }
+
+    a) REF(x.1) --> DEF(____.____)
+    b) REF(x.2) --> DEF(____.____)
+
+    C. /* Module 1 */               /* Module 2 */
+       int x = 1;                   double x = 1.0;
+       void main()                  int p2()
+       {                            {
+       }                            }
+
+    a) REF(x.1) --> DEF(____.____)
+    b) REF(x.2) --> DEF(____.____)
+
+7.9 考虑下面的程序，它由两个目标模块组成：
+
+    1 /* foo6.c */            1 /* bar6.c */
+    2 void p2(void);          2 #include <stdio.h>
+    3                         3
+    4 int main()              4 char main;
+    5 {                       5
+    6     p2();               6 void p2()
+    7     return 0;           7 {
+    8 }                       8     printf("0x%x\n", main);
+                              9 }
+
+    当在 Linux 系统中编译和执行这个程序时，即使 p2 不初始化变量 main，它也能打印字符
+    串“0x55\n”并正常终止。你能解释这一点吗？
+
+7.10 a 和 b 表示当前路径中的目标模块或静态库，而 a->b 表示 a 依赖于 b，也就是说a
+     引用了一个 b 定义的符号。对于下面的每个场景，给出使得静态链接器能够解析所有
+     符号引用的最小的命令行（含有最少数量的目标文件和库参数的命令）：
+
+     A. p.o -> libx.a -> p.o
+     B. p.o -> libx.a -> liby.a 和 liby.a -> libx.a
+     C. p.o -> libx.a -> liby.a 和 liby.a -> libx.a -> libz.a
+
+7.11 图 7-12 中的段头部表明数据段占用了存储器中 0x104 个字节。然后，只有开始的
+     0xe8 字节来自可执行文件的节。引起这种差异的原因是什么？
+
+7.12 图 7-10 中的 swap 程序包含 5 个重定位的引用。对于每个重定位的引用，给出它在
+     图 7-10 中的行号、运行时存储器地址和值。swap.o 模块中的原始代码和重定位条目
+     如图7-19 所示。
+
+     1  0000000 <swap>:
+     2  0: 55                   push %ebp
+     3  1: 8b 15 00 00 00 00    mov 0x0,%edx            ; Get *bufp0 = &buf[0]
+     4                          3: R_386_32 bufp0       ; Relocation entry
+     5  7: a1 04 00 00 00       mov 0x4,%eax            ; Get buf[1]
+     6                          8: R_386_32 buf         ; Relocation entry
+     7  c: 89 e5                mov %esp, %ebp
+     8  e: c7 05 00 00 00 00 04 movl $0x4, 0x0          ; bufp1 = &buf[1];
+     9  15: 00 00 00
+     10                         10: R_386_32 bufp1      ; Relocation entry
+     11                         14: R_386_32 buf        ; Relocation entry
+     12 18: 89 ec               mov %ebp, %esp
+     13 1a: 8b 01               mov (%edx), %ecx        ; temp = buf[0];
+     14 1c: 89 02               mov %eax, (%edx)        ; buf[0] = buf[1];
+     15 1e: a1 00 00 00 00      mov 0x0, %eax           ; Get *bufp1 = &buf[1]
+     16                         1f: R_386_32 bufp1      ; Relocation entry
+     17 23: 89 08               mov %ecx, (%eax)        ; buf[1] = temp;
+     18 25: 5d                  pop %ebp
+     19 26: c3                  ret
+
+     |------------------+------+----|
+     | 图 7-10 中的符号 | 地址 | 值 |
+     |------------------+------+----|
+     |                  |      |    |
+     |------------------+------+----|
+     |                  |      |    |
+     |------------------+------+----|
+     |                  |      |    |
+     |------------------+------+----|
+     |                  |      |    |
+     |------------------+------+----|
+     |                  |      |    |
+     |------------------+------+----|
+       图 7-19 家庭作业 7.12 的代买和重定位条目
+
+7.13 考虑图 7-20 中的 C 代码和相应的可重定位目标模块。
+
+     A. 确定当模块被重定位时，链接器将修改 .text 中的哪些指令。对于每条这样的指令，
+        列出它的重定位条目中的信息：节偏移、重定位类型符号名字。
+
+     B. 确定当模块被重定位时，链接器将修改 .data 中的哪些数据目标。对于每条这样的
+        指令，列出它的重定位条目中的信息：节偏移、重定位类型和符号名字。
+
+     可以随意使用诸如 objdump 之类的工具来帮助你解答这个题目。
+
+     ---------------------------------------------------------------------------
+     1  extern int p3(void);
+     2  int x = 1;
+     3  int *xp = &x;
+     4
+     5  void p2(int y) {
+     6  }
+     7
+     8  void p1() {
+     9      p2(*xp + p3());
+     10  }
+     ---------------------------------------------------------------------------
+         a) C 代码
+
+     ---------------------------------------------------------------------------
+     1  00000000 <p2>:
+     2     0:  55                  push %ebp
+     3     1:  89 e5               mov %esp, %ebp
+     4     3:  89 ec               mov %ebp, %esp
+     5     5:  5d                  pop %ebp
+     6     6:  c3                  ret
+
+     7  00000008 <p1>:
+     8     8:  55                  push %ebp
+     9     9:  89 e5               mov %esp, %ebp
+     10     b:  83 ec 08            sub $0x8, %esp
+     11     e:  83 c4 f4            add $0xfffffff4, %esp
+     12     11: e8 fc ff ff ff      call 12 <p1+0xa>
+     13     16: 89 c3               mov %eax, %edx
+     14     18: a1 00 00 00 00      mov 0x0, %eax
+     15     1d: 03 10               add (%eax), %edx
+     16     1f: 52                  push %edx
+     17     20: e8 fc ff ff ff      call 21 <p1+0x19>
+     18     25: 89 ec               mov %ebp, %esp
+     19     27: 5d                  pop %ebp
+     20     28: c3                  ret
+     ---------------------------------------------------------------------------
+         b) 可重定位目标文件的 .text 节
+
+     ---------------------------------------------------------------------------
+     1  00000000 <x>:
+     2     0: 01 00 00 00
+     3  00000004 <xp>:
+     4     4: 00 00 00 00
+     ---------------------------------------------------------------------------
+         c) 可重定位目标文件的 .data 节
+
+         图 7-20 家庭作业 7.13 的示例代码
+
+7.14 考虑图 7-21 中的 C 代码和相应的可重定位目标模块。
+
+     A. 确定当模块被重定位时，链接器将修改 .text 中的哪些指令。对于每条这样的指令，
+        列出它的重定位条目中的信息：节偏移、重定位类型和符号名字。
+
+     B. 确定当模块被重定位时，链接器将修改 .rodata 中的哪些数据。对于每条这样的指
+        令，列出它的重定位条目中的信息：节偏移、重定位类型和符号名字。
+
+     可以随意使用诸如 objdump 之类的工具来帮助你解答这个题目。
+
+     ----------------------------------------------------------------------------
+     1  int relo3(int val) {
+     2      switch (val) {
+     3      case 100:
+     4          return(val);
+     5      case 101:
+     6          return(val+1);
+     7      case 103: case 104:
+     8          return(val+3);
+     9      case 105:
+     10          return(val+5);
+     11      default:
+     12          return(val+6);
+     13      }
+     14  }
+     ----------------------------------------------------------------------------
+         a) C 代码
+
+     ----------------------------------------------------------------------------
+     1  00000000 <relo3>:
+     2     0:  55                   push %ebp
+     3     1:  89 e5                mov %esp, %ebp
+     4     3:  8b 45 08             mov 0x8(%ebp), %eax
+     5     6:  8d 50 9c             lea 0xffffff9c(%eax), %edx
+     6     9:  83 fa 05             cmp $0x5, %edx
+     7     c:  77 17                ja 25 <relo3+0x25>
+     8     e:  ff 24 95 00 00 00 00 jmp *0x0(,%edx,4)
+     9     15: 40                   jnc %eax
+     10    16: eb 10                jmp 28 <relo3+0x28>
+     11    18: 83 c0 03             add $0x3, %eax
+     12    1b: eb 0b                jmp 28 <relo3+0x28>
+     13    1d: 8d 76 00             lea 0x0(%esi), %esi
+     14    20: 83 c0 05             add $0x5, %eax
+     15    23: eb 03                jmp 28 <relo3+0x28>
+     16    25: 83 c0 06             add $0x6, %eax
+     17    28: 89 ec                mov %ebp, %esp
+     18    2a: 5d                   pop %ebp
+     19    2b: c3                   ret
+     ----------------------------------------------------------------------------
+         b) 可重定位木条文件的 .text 节
+
+     ----------------------------------------------------------------------------
+        This is the jump table for the switch statement
+     1  0000 28000000 15000000 25000000 18000000 4 words at offsets 0x0,0x4,0x8,and 0xc
+     2  0010 18000000 20000000                   2 words at offsets 0x10 and 0x14
+     ----------------------------------------------------------------------------
+         c) 可重定位目标文件的 .rodata 节
+
+         图 7-21 家庭作业 7.14 的示例代码
+
+7.15 完成下面的任务将帮助你更熟悉处理目标文件的各种工具。
+
+     A. 在你的系统上，libc.a 和 libm.a 的版本中包含多少目标文件？
+     B. gcc -O2 产生的可执行代码与 gcc -O2 -g 产生的不同吗？
+     C. 在你的系统上，GCC 驱动程序使用的是什么共享库？
+
+8.9 考虑四个具有如下开始和结束时间的进程：
+
+    |------+----------+----------|
+    | 进程 | 开始时间 | 结束时间 |
+    |------+----------+----------|
+    | A    |        5 |        7 |
+    | B    |        2 |        4 |
+    | C    |        3 |        6 |
+    | D    |        1 |        8 |
+    |------+----------+----------|
+
+    对于每对进程，指明它们是否是并发地运行的：
+
+    |--------+----------|
+    | 进程对 | 并发地？ |
+    |--------+----------|
+    | AB     |          |
+    |--------+----------|
+    | AC     |          |
+    |--------+----------|
+    | AD     |          |
+    |--------+----------|
+    | BC     |          |
+    |--------+----------|
+    | BD     |          |
+    |--------+----------|
+    | CD     |          |
+    |--------+----------|
+
+8.10 在这一章里，我们介绍了一些具有不寻常的调用和返回行为的函数：setjmp、longjmp、
+     execve 和 fork。找到下列行为中和每个函数相匹配的一种：
+
+    A. 调用一次，返回两次。
+    B. 调用一次，从不返回。
+    C. 调用一次，返回一次或者多次。
+
+8.11 这个程序会输出多少个“hello”输出行？
+
+     int main()
+     {
+             int i;
+
+             for (i = 0; i < 2; i++)
+                     Fork();
+             printf("hello\n");
+             exit(0);
+     }
+
+8.12 这个程序会输出多少个“hello”输出行？
+
+     #include "csapp.h"
+
+     void doit()
+     {
+             Fork();
+             Fork();
+             printf("hello\n");
+             return;
+     }
+
+     int main()
+     {
+             doit();
+             printf("hello\n");
+             return;
+     }
+
+8.13 下面程序的一种可能的输出是什么？
+
+     #include "csapp.h"
+
+     int main()
+     {
+             int x = 3;
+
+             if (Fork() != 0)
+                     printf("x=%d\n", ++x);
+
+             printf("x=%d\n", --x);
+             exit(0);
+     }
+
+8.14 下面这个程序会输出多少个“hello”输出行？
+
+    #include "csapp.h"
+
+    void doit()
+    {
+            if (Fork() == 0) {
+                    Fork();
+                    printf("hello\n");
+                    exit(0);
+            }
+            return;
+    }
+
+    int main()
+    {
+            doit();
+            printf("hello\n");
+            exit(0);
+    }
+
+8.15 下面这个程序会输出多少个“hello”输出行？
+
+     #include "csapp.h"
+
+     void doit()
+     {
+             if (Fork() == 0) {
+                     Fork();
+                     printf("hello\n");
+                     return;
+             }
+             return;
+     }
+
+     int main()
+     {
+             doit();
+             printf("hello\n");
+             exit(0);
+     }
+
+8.16 下面这个程序的输出是什么？
+
+     #include "csapp.h"
+
+     int counter = 1;
+
+     int main()
+     {
+             if (fork() == 0) {
+                     counter--;
+                     exit(0);
+             } else {
+                     Wait(NULL);
+                     printf("counter = %d\n", ++counter);
+             }
+
+             exit(0);
+     }
+
+8.17 列举练习题 8.4 中程序所有可能的输出。
+
+8.18 考虑下面的程序：
+
+     #include "csapp.h"
+
+     void end(void)
+     {
+             printf("2");
+     }
+
+     int main()
+     {
+             if (Fork() == 0)
+                     atexit(end);
+             if (Fork() == 0)
+                     printf("0");
+             else
+                     printf("1");
+             exit(0);
+     }
+
+     判断下面哪个输出是可能的。注意：atexit 函数以一个指向函数的指针为输入，并将
+     它添加到函数列表中（初始为空），当 exit 函数被调用时，会调用该列表中的函数。
+
+     A. 112002
+     B. 211020
+     C. 102120
+     D. 122001
+     E. 100212
+
+8.19 下面的函数打印多少行输出？给出一个答案为 n 的函数。假设 n >= 1。
+
+     void foo(int n)
+     {
+         int i;
+
+         for (i = 0; i < n; i++)
+             Fork();
+         printf("hello\n");
+         exit(0);
+     }
+
+8.20 使用 execve 编写一个叫做 myls 的程序，该程序的行为和 /bin/ls 程序的一样。你
+     的程序应该接受相同的命令行参数，解释同样的环境变量，并产生相同的输出。
+
+     ls 程序从 COLUMNS 环境变量中获得屏幕的宽度。如果没有设置 COLUMNS，那么 ls 会
+     假设屏幕宽 80 列。因此，你可以通过把 COLUMNS 环境设置小于 80，来检查你对环境
+     变量的处理：
+
+     unix> cc ex8-20.c -o myls
+     unix> setenv COLUMNS 40
+     ...output is 40 column wide
+     unix> ./myls
+     unix> unsetenv COLUMNS
+     unix> ./myls
+     ...output is now 80 columns wide
+
+8.21 下面程序的可能的输出序列是多少？
+
+     int main()
+     {
+             if (fork() == 0) {
+                     printf("a");
+                     exit(0);
+             } else {
+                     printf("b");
+                     waitpid(-1, NULL, 0);
+             }
+             printf("c");
+             exit(0);
+     }
+
+8.22 编写 UNIX system 函数的你自己的版本
+
+         int mysystem(char *command);
+
+     mysystem 函数通过调用“/bin/sh -c command”来执行 command，然后在 command 完
+     成后返回。如果 command（通过调用 exit 函数或者执行一条 return 语句）正常退出，
+     那么 mysystem 返回 command 退出状态。例如，如果 command 通过调用 exit(8) 终
+     止，那么 mysystem 返回值 8。否则，如果 command 是异常终止的，那么 mysystem
+     就返回外壳返回的状态。
+
+8.23 你的一个同事想要使用信号来让一个父进程对发生在一个子进程中的事件计数。其思
+     想是每次发生一个事件时，通过向父进程发送一个信号来通知它，并且让父进程的信
+     号处理程序对一个全局变量 counter 加一，在子进程终止之后，父进程就可以检查这
+     个变量。然而，当他在系统上运行下面测试代码时，发现父进程调用 printf 时，
+     counter 的值总是 2，即使子进程向父进程发送了 5 个信号。他很困惑，向你寻求帮
+     助。你能解释这个程序有什么错误吗？
+
+     #include "csapp.h"
+
+     int counter = 0;
+
+     void handler(int sig)
+     {
+          counter++;
+          sleep(1); /* Do some work in the handler */
+          return;
+     }
+
+     int main()
+     {
+          int i;
+
+          Signal(SIGUSR2, handler);
+
+          if (Fork() == 0) {  /* Child */
+               for (i = 0; i < 5; i++) {
+                    Kill(getppid(), SIGUSR2);
+                    printf("sent SIGUSR2 to parent\n");
+               }
+               exit(0);
+          }
+
+          Wait(NULL);
+          printf("counter=%d\n", counter);
+          exit(0);
+     }
+
+8.24 修改下面的程序，以满足下面两个条件：
+
+     #include "csapp.h"
+     #define N 2
+
+     int main(void)
+     {
+          int status, i;
+          pid_t pid;
+
+          /* Parent creates N children */
+          for (i = 0; i < N; i++)
+               if ((pid = Fork()) == 0) /* Child */
+                    exit(100+i);
+
+          /* Parent reaps N children in no particular order */
+          while ((pid = waitpid(-1, &status, 0)) > 0) {
+               if (WIFEXITED(status))
+                    printf("child %d terminated normally with exit status=%d\n",
+                           pid, WEXITSTATUS(status));
+               else
+                    printf("child %d terminated abnormally\n", pid);
+          }
+
+          /* The normal termination is if there are no more children */
+          if (errno != ECHILD)
+               unix_error("waitpid error");
+
+          exit(0);
+     }
+
+     1. 每个子进程在试图写一个只读文本段中的位置时会异常终止。
+     2. 父进程打印和下面所示相同（除了 PID）的输出：
+
+     child 12255 terminated by signal 11: Segmentation fault
+     child 12254 terminated by signal 11: Segmentation fault
+
+     提示：请参考 psignal(3) 的 man 页。
+
+8.25 编写 fgets 函数的一个版本，叫做 tfgets，它 5 秒中后会超时。tfgets 函数接收和
+     fgets 相同的输入。如果用户在 5 秒内不键入一个输入行，tfgets 返回 NULL。否则，
+     它返回一个指向输入行的指针。
+
+8.26 以图 8-22（sample/ch08/shellex.c）中的示例作为开始点，编写一个支持作业控制的
+     外壳程序。外壳必须具有以下特征：
+
+     o 用户输入的命令行由一个 name、零个或者多个参数组成，它们都是由一个或者多个
+       空格分隔开的。如果 name 是一个内置命令，那么外壳就立刻处理它，并等待下一个
+       命令行。否则，外壳就假设 name 是一个可执行的文件，在一个初始的子进程（作业）
+       的上下文中加载并运行它。作业的进程组 ID 与子进程的 PID 相同。
+
+     o 每个作业是由一个进程 ID（PID）或者一个作业 ID（JID）来标识的，它是由一个外
+       壳分配的任意的小正整数。JID 在命令行上用前缀“%”来表示。比如，“%5”表示
+       JID 5，而“5”表示 PID 5。
+
+     o 如果命令行以 & 结束，那么外壳程序就在后台运行这个作业。否则，外壳就在前台
+       运行这个作业。
+
+     o 输入 ctrl-c（ctrl-z），使得外壳发送一个 SIGINT（SIGTSTP）信号给前台进程组
+       中的每个进程。
+
+     o 内置命令 jobs 列出所有的后台作业。
+
+     o 内置命令 bg <job> 通过发送一个 SIGCONT 信号重启 <job>，然后在后台运行它。
+       <job>参数可以是一个 PID，也可以是一个 JID。
+
+     o 内置命令 fg <job> 通过发送一个 SIGCONT 信号重启 <job>，然后在前台运行它。
+
+     o 外壳回收它所有的僵死子进程。如果任何作业因为它收到一个未捕获的信号而终止，
+       那么外壳就输出一条信息到终端，包含该作业的 PID 和对违规信号的描述。
+
+     下面展示了一个示例的外壳会话：
+
+     unix> ./shell # Run your shell program
+     > bogus
+     bogus: Command not found. # Execve can't find executable
+     > foo 10
+     Job 5035 terminated by signal: Interrupt # User types ctrl-c
+     > foo 100 &
+     [1] 5036 foo 100 &
+     > foo 200 &
+     [2] 5037 foo 200 &
+     > fg %1
+     Job [1] 5036 stopped by signal: Stopped # User types ctrl-z
+     > jobs
+     [1] 5036 Stopped foo 100 &
+     [2] 5037 Running foo 200 &
+     > bg 5035
+     5035: No such process
+     > bg 5036
+     [1] 5036 foo 100 &
+     > /bin/kill 5036
+     Job 5036 terminated by signal: Terminated
+     >  fg %2 # Wait for fg job to finish.
+     > quit
+     unix> # Back to the UNIX shell
+
+9.14 假设有一个输入文件 hello.txt，由字符串“hello, world!\n”组成，编写一个 C 程
+     序，使用 mmap 将 hello.txt 的内容改为“Jello, world!\n”。
+
+9.17 开发 9.9.12 节中的分配器的一个版本，执行下一次适配搜索，而不是首次适配搜索。
+
+9.18 9.9.12 节中的分配器要求每个块既有头部也有脚部，以实现常数时间的合并。修改分
+     配器，使得空闲块需要头部和脚部，而已分配块只需要头部。
+
+9.20 编写你自己的 malloc 和 free 版本，将它的运行时间和空间利用率与标准 C 库提供
+     的 malloc 版本进行比较。
+
+10.6 下面程序的输出是什么？
+
+     #include "csapp.h"
+
+     int main()
+     {
+         int fd1, fd2;
+
+         fd1 = Open("foo.txt", O_RDONLY, 0);
+         fd2 = Open("bar.txt", O_RDONLY, 0);
+         Close(fd2);
+         fd2 = Open("baz.txt", O_RDONLY, 0);
+         printf("fd2 = %d\n", fd2);
+         exit(0);
+     }
+
+10.7 修改图 10-4 中所示的 cpfile 程序，使得它用 RIO 函数从标准输入拷贝到标准输出，
+     一次 MAXBUF 个字节。
+
+10.8 编写图 10-10 中的 statcheck 程序的一个版本，叫做 fstatcheck，它从命令行取得
+     一个描述符数字而不是文件名。
+
+10.9 考虑下面对家庭作业题 10.8 中的 fstatcheck 程序的调用
+
+     unix> fstatcheck 3 < foo.txt
+
+     你可能会预想这个对 fstatcheck 的调用将提取和显示文件 foo.txt 的元数据。然而，
+     当我们在系统上运行它时，它将失败，返回“坏的文件描述符”。根据这种情况，填
+     写出外壳在 fork 和 execve 调用之间必须执行的伪代码：
+
+     if (Fork() == 0) { /* Child */
+         /* What code is the shell executing right here? */
+         Execve("fstatcheck", argv, envp);
+     }
+
+10.10 修改图 10-4 中的 cpfile 程序，使得它有一个可选的命令行参数 infile。如果给定
+      了 infile，那么拷贝 infile 到标准输出，否则像以前那样拷贝标准输入到标准输出。
+      一个要求是对于两种情况，你的解答都必须使用原来的拷贝循环（第 9~11 行）。只
+      允许你插入代码，而不允许更改任何已经存在的代码。
+
+11.6 A. 修改 TINY 使得它会原样返回每个请求行和请求报头。
+     B. 使用你喜欢的浏览器向 TINY 发送一个对静态内容的请求。把 TINY 的输出记录到一个文件中。
+     C. 检查 TINY 的输出，确定你的浏览器使用的 HTTP 的版本。
+     D. 参考 RFC2616 中的 HTTP/1.1 标准，确定你的浏览器的 HTTP 请求中每个报头的
+        含义。你可以从 www.rfc-editor.org/rfc.html 获得 RFC2616。
+
+11.7 扩展 TINY，使得它可以提供 MPG 视频文件。用一个真正的浏览器来检验你的工作。
+
+11.8 修改 TINY，使得它在 SIGCHLD 处理程序中回收操作系统分配给 CGI 子进程的资源，
+     而不是显式地等待它们终止。
+
+11.9 修改 TINY，使得当它服务静态内容时，使用 malloc、rio_readn 和 rio_writen，而
+     不是 mmap 和 rio_writen，来拷贝被请求文件到已连接描述符。
+
+11.10 A. 写出图 11-26 中 CGI adder 函数的 HTML 表单。你的表单应该包括两个文本框，
+         用户将需要相加的两个数字填在这两个文本框中。你的表单应该使用 GET 方法请
+         求内容。
+      B. 用这样的方法来检查你的程序：使用一个真正的浏览器向 TINY 请求表单，向
+         TINY 提交填写好的表单，然后显示 adder 生成的动态内容。
+
+11.11 扩展 TINY，以支持 HTTP HEAD 方法。使用 TELNET 作为 Web 客户端来验证你的工
+      作。
+
+11.12 扩展 TINY，使得它服务以 HTTP POST 方式请求的动态内容。用你喜欢的 Web 浏览
+      器来验证你的工作。
+
+11.13 修改 TINY，使得它可以干净地处理（而不是终止）在 write 函数试图写一个过早关
+      闭的连接时发生的 SIGPIPE 信号和 EPIPE 错误。
+
+12.16 编写 hello.c（见图 12-13）的一个版本，它创建和回收 n 个可结合的对等线程，其
+      中 n 是一个命令行参数。
+
+12.22 检查一下你对 select 函数的理解，请修改图 12-6 中（select.c）的服务器，使得
+      它在主服务器的每次迭代中最多回送一个文本行。
+
+12.23 图 12-8 中（echoservers.c）的事件驱动并发 echo 服务器是有缺陷的，因为一个恶
+      意的客户端能够通过发送部分的文本行，使服务器拒绝为其他客户端服务。编写一个
+      改进的服务器版本，使之能够非阻塞地处理这些部分文本行。
+
+12.24 RIO/IO 包中的函数（见 10.4 节）都是线程安全的。它们也都是可重入函数吗？
+
+12.31 实现标准 I/O 函数 fgets 的一个版本，叫做 tfgets，加入它在 5 秒之内没有从标
+      准输入上接收到一个输入行，那么就超时，并返回一个 NULL 指针。你的函数应该实
+      现在一个叫做 tfgets-proc.c 的包中，使用进程、信号和非本地跳转。它不应该使用
+      UNIX 的 alarm 函数。使用下面的驱动程序测试你的结果。
+
+      #include "csapp.h"
+
+      char *tfgets(char *s, int size, FILE *stream);
+
+      int main()
+      {
+          char buf[MAXLINE];
+
+          if (tfgets(buf, MAXLINE, stdin) == NULL)
+              printf("BOOM!\n");
+          else
+              printf("%s", buf);
+
+          exit(0);
+      }
+
+12.32 使用 select 函数来实现练习题 12.31 中 tfgets 函数的一个版本。你的函数应该在
+      一个叫做 tfgets-select.c 的包中实现。用练习题 12.31 中的驱动程序测试你的结
+      果。你可以假定标准输入被赋值为描述符 0。
+
+12.33 实现练习题 12.31 中 tfgets 函数的一个线程化的版本。你的函数应该在一个叫做
+      tfgets-thread.c 的包中实现。用练习题 12.31 中的驱动程序测试你的结果。
