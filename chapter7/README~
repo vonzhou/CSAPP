@@ -1,0 +1,14 @@
+
+CODE：
+P449  - main.c   swap.c
+P455 - foo3.c   bar3.c 
+P458  - addvec.c multvec.c  main2.c 
+
+
+
+1.探寻ELF文件内部：
+http://blog.csdn.net/vonzhoufz/article/details/44925439
+
+2.创建并使用静态库（ar 命令）
+http://blog.csdn.net/vonzhoufz/article/details/44463977
+
