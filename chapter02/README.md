@@ -70,7 +70,29 @@ show_bytes((byte_pointer)s, strlen(s));
 
 ### 注意在C中，加法比移位运算优先级高，所以要写成 (1 << 2) + 3, 所以不确定就加括号吧，少年
 
-### 
+### B2Uw函数(Binary to Unsinged)，B2Tw(Binary to Two's-complement)都是双射函数，相应的数和二进制向量唯一映射
+
+### C语言标准没有要求用补码表示有符号整数，但是几乎所有的机器都是这么做的。但是保证最大移植性的做法是利用 limits.h中的典型取值范围，而不要自我假设
+
+### 有符号数和无符号数强制类型转化结果位保持不变，只是改变了解释这些位的方式：数值可能会改变，但是位模式不变
+[unsigned_cast.c](unsigned_cast.c)
+
+### 理解有符号数和无符号数强制类型转化之间的数学关系
+![](t2u.jpg)
+
+### printf没用任何类型信息，可以用%d输出unsigned类型，也可以用%u输出int类型
+[printf_no_type.c](printf_no_type.c)
+
+### C语言运算表达式中如果一个是有符号数一个是无符号数，则会隐式的将有符号转换为无符号，来执行运算, 对标准算术运算可能差异不大，但是对于关系运算就要注意了
+[type_cast_op.c](type_cast_op.c)
+
+### 对于提升数据类型（位扩展），无符号数总是零扩展，有符号数是符号扩展
+[zero_sign_extension.c](zero_sign_extension.c),  OSX是小端，所以输出 c7 cf ff ff
+
+### 证明符号扩展的正确性, 利用数学归纳法，证明一位扩展正确即可
+![](sign_extension_prove.jpg)
+
+
 
 
 
