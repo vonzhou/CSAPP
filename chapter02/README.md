@@ -92,7 +92,16 @@ show_bytes((byte_pointer)s, strlen(s));
 ### 证明符号扩展的正确性, 利用数学归纳法，证明一位扩展正确即可
 ![](sign_extension_prove.jpg)
 
+### C语言标准：把short转换成unsigned时，先改变大小再完成从有符号到无符号的转换。 short -> int -> unsigned
+[type_cast_mystery.c](type_cast_mystery.c)
 
+### 习题2.25 问题在于无符号运算, 0U - 1 = UMax, 然后访问非法地址，coredump
+[sum_elements.c](sum_elements.c)
+
+### 习题2.26 问题仍然是无符号运算的微妙，size_t定义为unsigned int. 在做差和比较时会采用无符号运算，如果a<b, a-b是负数，会成为一个很大的无符号数，所以结果不正确
+[stronger.c](stronger.c)
+
+### 
 
 
 
