@@ -10,7 +10,7 @@
 
 
 ### [1 计算机系统漫游](chapter01)
-### [2 信息的表示和处理](chapter02)
+### [2 信息的表示和处理](https://github.com/vonzhou/CSAPP/tree/master/chapter02#2-信息的表示和处理)
 ### [3 程序的机器级表示](chapter03)
 ### [4 处理器体系结构](chapter04)
 ### [5 优化程序性能](chapter05)
@@ -24,6 +24,7 @@
 
 ### 参考链接
 [CSAPP 官网](http://csapp.cs.cmu.edu/public/students.html)
+
 https://github.com/mofaph/csapp
 
 	
