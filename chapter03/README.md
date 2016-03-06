@@ -30,8 +30,34 @@ Disassembly of section .text:
 ### IA32整数寄存器
 ![](registers.jpg)
 
-### 数据传送示例
+### 数据传送示例-P116
 [exchange.c](exchange.c)
+
+```
+vonzhou@ubuntu:~/Github/CSAPP/chapter03$ gcc -m32 -O1 -c exchange.c 
+vonzhou@ubuntu:~/Github/CSAPP/chapter03$ objdump -d exchange.o 
+
+exchange.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <exchange>:
+   0:	8b 54 24 04          	mov    0x4(%esp),%edx
+   4:	8b 02                	mov    (%edx),%eax
+   6:	8b 4c 24 08          	mov    0x8(%esp),%ecx
+   a:	89 0a                	mov    %ecx,(%edx)
+   c:	c3                   	ret    
+```
+
+理解：过程加载后，xp和y分别存储在相对于寄存器esp偏移4，8的地方，这里是esp（**和书中不同**），mov    0x4(%esp),%edx 将xp的值加载到edx中，mov    (%edx),%eax 将xp对应的地址处的值加载到eax中，mov    0x8(%esp),%ecx将y的值加载到ecx中，mov    %ecx,(%edx)将y的值存储到xp对应的存储地址处，ret返回，返回值在eax中，正是*xp之前的值;
+
+1. C语言中的指针其实就是地址，引用指针就是将指针取到寄存器中，然后在存储器访问中使用这个寄存器
+2. 函数体中的局部变量x存在寄存器，而非存储器中
+
+
+### 
+
 
 
 
