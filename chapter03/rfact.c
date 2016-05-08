@@ -8,6 +8,6 @@ int rfact(int n){
 }
 
 int main(){
-	rfact(10);
+	printf("%d\n",rfact(10));
 	return 0;
 }
