@@ -3,7 +3,7 @@
 
 ### 功力性的读和心平气和的读，你会读到不同的味道！ 
 
-![](csapp.jpg)
+![](csapp.jpg)    <img src="https://github.com/vonzhou/Blog/blob/master/content/images/Wechat.jpeg" height="400" width="400">
 
 
 ### [1 计算机系统漫游](chapter01)
