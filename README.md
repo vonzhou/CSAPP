@@ -1,7 +1,7 @@
 #  深入理解计算机系统·第二版
 
 
-### 功力性的读和心平气和的读，你会读到不同的味道！ 
+### 功利性的读和心平气和的读，你会读到不同的味道！ 
 
 ![](csapp.jpg)    <img src="https://github.com/vonzhou/Blog/blob/master/content/images/Wechat.jpeg" height="400" width="400">
 
